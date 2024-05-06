@@ -107,6 +107,24 @@ app.put('/herois/:id', async (req, res) => {
     }
 });
 
+// pegar por nome
+app.get('/herois/nome/:nome', async (req, res) => {
+    const { nome } = req.params;
+
+    try {
+        const result = await pool.query('SELECT * FROM herois WHERE nome = $1', [nome]);
+
+        if (result.rowCount == 0) {
+            return res.status(404).send('Herói não encontrado');
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Erro ao obter herói:', error);
+        res.status(500).send('Erro ao obter herói');
+    }
+});
+
 // Inicie o servidor
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}🦸‍♀️🚀`);
