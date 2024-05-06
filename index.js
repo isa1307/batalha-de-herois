@@ -162,80 +162,47 @@ app.get('/herois/batalha/:id1/:id2', async (req, res) => {
         const poder2 = heroi2.nivel + heroi2.vida / 2;
 
         if (poder1 > poder2) {
-            res.send({messagem: `${heroi1.nome} com pontuaçaõ de ${poder1} venceu a batalha🦸‍♀️🚀, e ${heroi2.nome} foi derrotado com pontuação de ${poder2}`,
-            vencedor: heroi1,
-        
-        });
+            res.send({
+                messagem: `${heroi1.nome} com pontuaçaõ de ${poder1} venceu a batalha🦸‍♀️🚀, e ${heroi2.nome} foi derrotado com pontuação de ${poder2}`,
+                vencedor: heroi1,
+
+            });
             await pool.query(
                 'INSERT INTO batalhas (id_heroi1, id_heroi2, vencedor) VALUES ($1, $2, $3)',
                 [heroi1.id, heroi2.id, heroi1.id]
+            );
+
+        } else if (poder2 > poder1) {
+
+            res.send({
+                messagem: `${heroi2.nome} com pontuaçaõ de ${poder2} venceu a batalha🦸‍♀️🚀, e ${heroi1.nome} foi derrotado com pontuação de ${poder1}`,
+                vencedor: heroi2,
+            });
+            await pool.query(
+                'INSERT INTO batalhas (id_heroi1, id_heroi2, vencedor) VALUES ($1, $2, $3)',
+                [heroi1.id, heroi2.id, heroi2.id]
             );
           
-        } else if (poder2 > poder1) {
-    
-            res.send({messagem:`${heroi2.nome} com pontuaçaõ de ${poder2} venceu a batalha🦸‍♀️🚀, e ${heroi1.nome} foi derrotado com pontuação de ${poder1}`,
-            vencedor: heroi2,
-        });
+        } else if (poder1 == poder2) {
+            res.send(`Empate, ambas pontuações foram ${poder1} 🦸‍♀️🚀`);
+            const empate = heroi1.id || heroi2.id ;
             await pool.query(
                 'INSERT INTO batalhas (id_heroi1, id_heroi2, vencedor) VALUES ($1, $2, $3)',
-                [heroi1.id, heroi2.id, heroi1.id]
+                [heroi1.id, heroi2.id, empate]
             );
-         } else if (poder1 == poder2) {
-                res.send(`Empate, ambas pontuações foram ${poder1} 🦸‍♀️🚀`);
-
-                await pool.query(
-                    'INSERT INTO batalhas (id_heroi1, id_heroi2) VALUES ($1, $2)',
-                    [heroi1.id, heroi2.id]
-                );
-            }
-        } catch (error) {
-            console.error('Erro ao batalhar:', error);
-            res.status(500).send('Erro ao batalhar');
-        }
-    });
-
-// procurar batalha por heroi
-/* app.get('/herois/batalha/:nome', async (req, res) => {
-    const { nome } = req.params;
-
-    try {
-        const result = await pool.query('SELECT * FROM herois WHERE nome = $1', [nome]);
-
-        if (result.rowCount == 0) {
-            return res.status(404).send('Herói não encontrado');
-        }
-
-        const heroi = result.rows[0];
-
-        const result2 = await pool.query('SELECT * FROM herois WHERE id != $1', [heroi.id]);
-
-        if (result2.rowCount == 0) {
-            return res.status(404).send('Herói não encontrado');
-        }
-
-        const heroi2 = result2.rows[0];
-
-        const poder1 = heroi.nivel + heroi.vida / 2;
-        const poder2 = heroi2.nivel + heroi2.vida / 2;
-
-        if (poder1 > poder2) {
-            res.send(`${heroi.nome} com pontuaçaõ de ${poder1} venceu a batalha🦸‍♀️🚀, e ${heroi2.nome} foi derrotado com pontuação de ${poder2}`);
-        } else if (poder2 > poder1) {
-            res.send(`${heroi2.nome} com pontuaçaõ de ${poder2} venceu a batalha🦸‍♀️🚀, e ${heroi.nome} foi derrotado com pontuação de ${poder1}`);
-        } else {
-            res.send(`Empate, ambas pontuações foram ${poder1} 🦸‍♀️🚀`);
         }
     } catch (error) {
         console.error('Erro ao batalhar:', error);
         res.status(500).send('Erro ao batalhar');
     }
-}); */
+});
+
 
 // listar todas as batalhas feitas
 app.get('/herois/batalhas', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM Batalhas INNER JOIN herois ON Batalhas.vencedor = herois.id');
-        
+
         res.json({
             total: result.rowCount,
             batalhas: result.rows,
