@@ -30,7 +30,82 @@ app.get('/herois', async (req, res) => {
     }
 });
 
+// adicionar um novo herói
+app.post('/herois', async (req, res) => {
+    const { nome, poder, nivel, vida } = req.body;
 
+    // verificar se a vida está entre 1 e 200
+    if (vida < 1 || vida > 200) {
+        return res.status(400).send('A vida deve estar entre 1 e 200');
+    }
+
+    // verificar se o nível está entre 1 e 10
+    if (nivel < 1 || nivel > 10) {
+        return res.status(400).send('O nível deve estar entre 1 e 10');
+    }
+
+    try {
+      await pool.query(
+            'INSERT INTO herois (nome, poder, nivel, vida) VALUES ($1, $2, $3, $4)',
+            [nome, poder, nivel, vida]
+        );
+
+        res.status(201).send(`Herói ${nome} adicionado com sucesso 🦸‍♀️🚀`);
+    } catch (error) {
+        console.error('Erro ao adicionar herói:', error);
+        res.status(500).send('Erro ao adicionar herói');
+    }
+});
+
+//deletar herois
+app.delete('/herois/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const result = await pool.query('DELETE FROM herois WHERE id = $1', [id]);
+
+        if (result.rowCount == 0) {
+            return res.status(404).send('Herói não encontrado');
+        }
+
+        res.send(`Herói ${nome} deletado com sucesso 🦸‍♀️🚀`);
+    } catch (error) {
+        console.error('Erro ao deletar herói:', error);
+        res.status(500).send('Erro ao deletar herói');
+    }
+});
+
+// editar herois
+app.put('/herois/:id', async (req, res) => {
+    const { id } = req.params;
+    const { nome, poder, nivel, vida } = req.body;
+
+    // verificar se a vida está entre 1 e 200
+    if (vida < 1 || vida > 200) {
+        return res.status(400).send('A vida deve estar entre 1 e 200');
+    }
+
+    // verificar se o nível está entre 1 e 10
+    if (nivel < 1 || nivel > 10) {
+        return res.status(400).send('O nível deve estar entre 1 e 10');
+    }
+
+    try {
+        const result = await pool.query(
+            'UPDATE herois SET nome = $1, poder = $2, nivel = $3, vida = $4 WHERE id = $5',
+            [nome, poder, nivel, vida, id]
+        );
+
+        if (result.rowCount == 0) {
+            return res.status(404).send('Herói não encontrado');
+        }
+
+        res.send(`Herói ${nome} editado com sucesso 🦸‍♀️🚀`);
+    } catch (error) {
+        console.error('Erro ao editar herói:', error);
+        res.status(500).send('Erro ao editar herói');
+    }
+});
 
 // Inicie o servidor
 app.listen(PORT, () => {
