@@ -162,17 +162,37 @@ app.get('/herois/batalha/:id1/:id2', async (req, res) => {
         const poder2 = heroi2.nivel + heroi2.vida / 2;
 
         if (poder1 > poder2) {
-            res.send(`${heroi1.nome} com pontuaçaõ de ${poder1} venceu a batalha🦸‍♀️🚀, e ${heroi2.nome} foi derrotado com pontuação de ${poder2}`);
+            res.send({messagem: `${heroi1.nome} com pontuaçaõ de ${poder1} venceu a batalha🦸‍♀️🚀, e ${heroi2.nome} foi derrotado com pontuação de ${poder2}`,
+            vencedor: heroi1,
+        
+        });
+            await pool.query(
+                'INSERT INTO batalhas (id_heroi1, id_heroi2, vencedor) VALUES ($1, $2, $3)',
+                [heroi1.id, heroi2.id, heroi1.id]
+            );
+          
         } else if (poder2 > poder1) {
-            res.send(`${heroi2.nome} com pontuaçaõ de ${poder2} venceu a batalha🦸‍♀️🚀, e ${heroi1.nome} foi derrotado com pontuação de ${poder1}`);
-        } else {
-            res.send(`Empate, ambas pontuações foram ${poder1} 🦸‍♀️🚀`);
+    
+            res.send({messagem:`${heroi2.nome} com pontuaçaõ de ${poder2} venceu a batalha🦸‍♀️🚀, e ${heroi1.nome} foi derrotado com pontuação de ${poder1}`,
+            vencedor: heroi2,
+        });
+            await pool.query(
+                'INSERT INTO batalhas (id_heroi1, id_heroi2, vencedor) VALUES ($1, $2, $3)',
+                [heroi1.id, heroi2.id, heroi1.id]
+            );
+         } else if (poder1 == poder2) {
+                res.send(`Empate, ambas pontuações foram ${poder1} 🦸‍♀️🚀`);
+
+                await pool.query(
+                    'INSERT INTO batalhas (id_heroi1, id_heroi2) VALUES ($1, $2)',
+                    [heroi1.id, heroi2.id]
+                );
+            }
+        } catch (error) {
+            console.error('Erro ao batalhar:', error);
+            res.status(500).send('Erro ao batalhar');
         }
-    } catch (error) {
-        console.error('Erro ao batalhar:', error);
-        res.status(500).send('Erro ao batalhar');
-    }
-});
+    });
 
 // procurar batalha por heroi
 /* app.get('/herois/batalha/:nome', async (req, res) => {
@@ -210,6 +230,21 @@ app.get('/herois/batalha/:id1/:id2', async (req, res) => {
         res.status(500).send('Erro ao batalhar');
     }
 }); */
+
+// listar todas as batalhas feitas
+app.get('/herois/batalhas', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM Batalhas INNER JOIN herois ON Batalhas.vencedor = herois.id');
+        
+        res.json({
+            total: result.rowCount,
+            batalhas: result.rows,
+        });
+    } catch (error) {
+        console.error('Erro ao obter batalhas:', error);
+        res.status(500).send('Erro ao obter batalhas');
+    }
+});
 
 // Inicie o servidor
 app.listen(PORT, () => {
