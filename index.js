@@ -197,12 +197,38 @@ app.get('/herois/batalha/:id1/:id2', async (req, res) => {
     }
 });
 
+// pesquisar batalha por nome do heroi
+app.get('/herois/batalha/:nome', async (req, res) => {
+    const { nome } = req.params;
+
+    try {
+        const result = await pool.query('SELECT * FROM herois WHERE nome = $1', [nome]);
+
+        if (result.rowCount == 0) {
+            return res.status(404).send('Herói não encontrado');
+        }
+
+        const heroi = result.rows[0];
+
+        const resultBatalhas = await pool.query('SELECT * FROM batalhas WHERE id_heroi1 = $1 OR id_heroi2 = $1', [heroi.id]);
+
+        res.json({
+            total: resultBatalhas.rowCount,
+            batalhas: resultBatalhas.rows,
+            vencedor: heroi
+        });
+    } catch (error) {
+        console.error('Erro ao obter batalhas:', error);
+        res.status(500).send('Erro ao obter batalhas');
+    }
+});
+
 
 // listar todas as batalhas feitas
 app.get('/herois/batalhas', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM Batalhas INNER JOIN herois ON Batalhas.vencedor = herois.id');
-
+        const result = await pool.query('SELECT batalhas.id as id_batalha, batalhas.vencedor as vencedor, herois.*  FROM Batalhas INNER JOIN herois ON Batalhas.vencedor = herois.id');
+        
         res.json({
             total: result.rowCount,
             batalhas: result.rows,
@@ -212,7 +238,6 @@ app.get('/herois/batalhas', async (req, res) => {
         res.status(500).send('Erro ao obter batalhas');
     }
 });
-
 // Inicie o servidor
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}🦸‍♀️🚀`);
