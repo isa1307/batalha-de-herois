@@ -45,7 +45,7 @@ app.post('/herois', async (req, res) => {
     }
 
     try {
-      await pool.query(
+        await pool.query(
             'INSERT INTO herois (nome, poder, nivel, vida) VALUES ($1, $2, $3, $4)',
             [nome, poder, nivel, vida]
         );
@@ -142,6 +142,74 @@ app.get('/herois/nivel/:nivel', async (req, res) => {
         res.status(500).send('Erro ao obter herói');
     }
 });
+
+// batalha entre herois 
+app.get('/herois/batalha/:id1/:id2', async (req, res) => {
+    const { id1, id2 } = req.params;
+
+    try {
+        const result1 = await pool.query('SELECT * FROM herois WHERE id = $1', [id1]);
+        const result2 = await pool.query('SELECT * FROM herois WHERE id = $1', [id2]);
+
+        if (result1.rowCount == 0 || result2.rowCount == 0) {
+            return res.status(404).send('Herói não encontrado');
+        }
+
+        const heroi1 = result1.rows[0];
+        const heroi2 = result2.rows[0];
+
+        const poder1 = heroi1.nivel + heroi1.vida / 2;
+        const poder2 = heroi2.nivel + heroi2.vida / 2;
+
+        if (poder1 > poder2) {
+            res.send(`${heroi1.nome} com pontuaçaõ de ${poder1} venceu a batalha🦸‍♀️🚀, e ${heroi2.nome} foi derrotado com pontuação de ${poder2}`);
+        } else if (poder2 > poder1) {
+            res.send(`${heroi2.nome} com pontuaçaõ de ${poder2} venceu a batalha🦸‍♀️🚀, e ${heroi1.nome} foi derrotado com pontuação de ${poder1}`);
+        } else {
+            res.send(`Empate, ambas pontuações foram ${poder1} 🦸‍♀️🚀`);
+        }
+    } catch (error) {
+        console.error('Erro ao batalhar:', error);
+        res.status(500).send('Erro ao batalhar');
+    }
+});
+
+// procurar batalha por heroi
+/* app.get('/herois/batalha/:nome', async (req, res) => {
+    const { nome } = req.params;
+
+    try {
+        const result = await pool.query('SELECT * FROM herois WHERE nome = $1', [nome]);
+
+        if (result.rowCount == 0) {
+            return res.status(404).send('Herói não encontrado');
+        }
+
+        const heroi = result.rows[0];
+
+        const result2 = await pool.query('SELECT * FROM herois WHERE id != $1', [heroi.id]);
+
+        if (result2.rowCount == 0) {
+            return res.status(404).send('Herói não encontrado');
+        }
+
+        const heroi2 = result2.rows[0];
+
+        const poder1 = heroi.nivel + heroi.vida / 2;
+        const poder2 = heroi2.nivel + heroi2.vida / 2;
+
+        if (poder1 > poder2) {
+            res.send(`${heroi.nome} com pontuaçaõ de ${poder1} venceu a batalha🦸‍♀️🚀, e ${heroi2.nome} foi derrotado com pontuação de ${poder2}`);
+        } else if (poder2 > poder1) {
+            res.send(`${heroi2.nome} com pontuaçaõ de ${poder2} venceu a batalha🦸‍♀️🚀, e ${heroi.nome} foi derrotado com pontuação de ${poder1}`);
+        } else {
+            res.send(`Empate, ambas pontuações foram ${poder1} 🦸‍♀️🚀`);
+        }
+    } catch (error) {
+        console.error('Erro ao batalhar:', error);
+        res.status(500).send('Erro ao batalhar');
+    }
+}); */
 
 // Inicie o servidor
 app.listen(PORT, () => {
