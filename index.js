@@ -68,8 +68,11 @@ app.post('/herois', async (req, res) => {
             'INSERT INTO herois (nome, poder, nivel, vida) VALUES ($1, $2, $3, $4)',
             [nome, poder, nivel, vida]
         );
-
-        res.status(201).send(`Herói ${nome} adicionado com sucesso 🦸‍♀️🚀`);
+        
+        res.status(201).json({ 
+            message: `Herói ${nome} adicionado com sucesso 🦸‍♀️🚀`,
+            heroi: { nome, poder, nivel, vida }
+        });
     } catch (error) {
         console.error('Erro ao adicionar herói:', error);
         res.status(500).send('Erro ao adicionar herói');
@@ -81,11 +84,15 @@ app.delete('/herois/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const result = await pool.query('DELETE FROM herois WHERE id = $1', [id]);
+        const resultHeroi = await pool.query('SELECT * FROM herois WHERE id = $1', [id]);
 
-        if (result.rowCount == 0) {
+        if (resultHeroi.rowCount == 0) {
             return res.status(404).send('Herói não encontrado');
         }
+
+        const nome = resultHeroi.rows[0].nome;
+
+        await pool.query('DELETE FROM batalhas WHERE id_heroi1 = $1 OR id_heroi2 = $1', [id]);
 
         res.send(`Herói ${nome} deletado com sucesso 🦸‍♀️🚀`);
     } catch (error) {
@@ -125,7 +132,10 @@ app.put('/herois/:id', async (req, res) => {
             return res.status(404).send('Herói não encontrado');
         }
 
-        res.send(`Herói ${nome} editado com sucesso 🦸‍♀️🚀`);
+        res.status(201).json({ 
+            message: `Herói ${nome} editado com sucesso 🦸‍♀️🚀`,
+            heroi: { nome, poder, nivel, vida }
+        });
     } catch (error) {
         console.error('Erro ao editar herói:', error);
         res.status(500).send('Erro ao editar herói');
