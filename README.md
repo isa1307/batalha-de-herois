@@ -7,17 +7,17 @@ O Projeto de Gerenciamento de Heróis é uma aplicação de backend desenvolvida
    Certifique-se de ter o Node.js e o PostgreSQL instalados em sua máquina.
 
 2. **Clonando o Repositório:**
-   ```bash
-   git clone https://github.com/seu-usuario/nome-do-repositorio.git
-   ```
+  
+ git clone (https://github.com/isa1307/batalha-de-herois.git)
+  
 
-3. **Instalando Dependências:**
+4. **Instalando Dependências:**
    Navegue até o diretório do projeto e execute o comando:
    ```bash
    npm install
    ```
 
-4. **Configuração do Banco de Dados:**
+5. **Configuração do Banco de Dados:**
    - Certifique-se de ter o PostgreSQL em execução.
    - Crie um banco de dados chamado `atividade_herois`.
    - Verifique se as configurações do banco de dados no arquivo `index.js` estão corretas:
