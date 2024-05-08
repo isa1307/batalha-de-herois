@@ -43,6 +43,24 @@ app.get('/herois', async (req, res) => {
     }
 });
 
+//pegar por id
+app.get('/herois/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const result = await pool.query('SELECT * FROM herois WHERE id = $1', [id]);
+
+        if (result.rowCount == 0) {
+            return res.status(404).send('Herói não encontrado');
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Erro ao obter herói:', error);
+        res.status(500).send('Erro ao obter herói');
+    }
+});
+
 // adicionar um novo herói
 app.post('/herois', async (req, res) => {
     const { nome, poder, nivel, vida } = req.body;
@@ -148,12 +166,14 @@ app.get('/herois/nome/:nome', async (req, res) => {
 
     try {
         const result = await pool.query('SELECT * FROM herois WHERE nome = $1', [nome]);
+       
 
         if (result.rowCount == 0) {
             return res.status(404).send('Herói não encontrado');
         }
 
-        res.json(result.rows[0]);
+        res.json(result.rows);
+      
     } catch (error) {
         console.error('Erro ao obter herói:', error);
         res.status(500).send('Erro ao obter herói');
@@ -170,8 +190,12 @@ app.get('/herois/nivel/:nivel', async (req, res) => {
         if (result.rowCount == 0) {
             return res.status(404).send('Herói não encontrado');
         }
+        
+        res.json({
+            total: result.rowCount,
+            herois_com_mesmo_nivel: result.rows,
+        });
 
-        res.json(result.rows);
     } catch (error) {
         console.error('Erro ao obter herói:', error);
         res.status(500).send('Erro ao obter herói');
@@ -277,21 +301,19 @@ app.get('/herois/batalha/:nome', async (req, res) => {
         res.status(500).send('Erro ao obter batalhas');
     }});
 
-   
-// listar todas as batalhas feitas
-app.get('/herois/batalhas', async (req, res) => {
+   //pegar todas as batalhas 
+   app.get('/batalhas', async (req, res) => {
     try {
-        const result = await pool.query('SELECT batalhas.id as id_batalha, batalhas.vencedor as vencedor, herois.*  FROM Batalhas INNER JOIN herois ON Batalhas.vencedor = herois.id');
-        
+        const { rows } = await pool.query('SELECT * FROM batalhas');
         res.json({
-            total: result.rowCount,
-            batalhas: result.rows,
+            total: rows.length,
+            batalhas: rows,
         });
     } catch (error) {
-        console.error('Erro ao obter batalhas:', error);
         res.status(500).send('Erro ao obter batalhas');
     }
 });
+
 // Inicie o servidor
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}🦸‍♀️🚀`);
