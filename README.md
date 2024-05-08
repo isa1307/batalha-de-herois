@@ -1,3 +1,6 @@
+# Gerenciamento de heróis 🦸‍♀️🦸‍♂️
+O Projeto de Gerenciamento de Heróis é uma aplicação de backend desenvolvida para oferecer funcionalidades de CRUD (Create, Read, Update, Delete) relacionadas a heróis. Ele permite a criação, atualização, exclusão e recuperação de informações sobre heróis, bem como funcionalidades adicionais, como batalhas entre heróis e registro de histórico de batalhas.
+
 ## Configuração
 
 1. **Instalação de Dependências:**
