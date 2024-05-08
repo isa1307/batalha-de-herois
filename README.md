@@ -36,7 +36,7 @@ O Projeto de Gerenciamento de Heróis é uma aplicação de backend desenvolvida
 Após configurar o ambiente, você pode iniciar o servidor com o seguinte comando:
 
 ```bash
-npm start
+npm run start
 ```
 
 Isso iniciará o servidor na porta padrão 3000, a menos que você tenha definido uma porta diferente nas variáveis de ambiente.
@@ -56,10 +56,4 @@ Isso iniciará o servidor na porta padrão 3000, a menos que você tenha definid
 - **GET /herois/batalha/:nome:** Retorna as batalhas em que um herói participou, incluindo se ele foi o vencedor.
 - **GET /herois/batalhas:** Retorna todas as batalhas realizadas, incluindo os heróis vencedores.
 
-## Contribuição
 
-Se você quiser contribuir com melhorias para este projeto, fique à vontade para enviar pull requests ou abrir issues!
-
----
-
-Esse README fornece uma visão geral do seu projeto, instruções para configurar e executar, além de detalhes sobre as rotas disponíveis. Lembre-se de adaptar as instruções de acordo com as necessidades específicas do seu projeto e da sua configuração de ambiente.
