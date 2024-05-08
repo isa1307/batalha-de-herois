@@ -16,6 +16,19 @@ const pool = new Pool({
     port: 5432,
 });
 
+
+//validar campos
+
+function validarCampos(body) {
+    const campos = ['nome', 'poder', 'nivel', 'vida'];
+    for (let campo of campos) {
+        if (!body[campo]) {
+            return campo;
+        }
+    }
+    return null;
+}
+
 // Rota para listar todos os heróis
 app.get('/herois', async (req, res) => {
     try {
@@ -33,6 +46,12 @@ app.get('/herois', async (req, res) => {
 // adicionar um novo herói
 app.post('/herois', async (req, res) => {
     const { nome, poder, nivel, vida } = req.body;
+
+    const campoVazio = validarCampos(req.body);
+    if (campoVazio) {
+        return res.status(400).send({ mensagem: `Preencha o campo ${campoVazio}` });
+    }
+
 
     // verificar se a vida está entre 1 e 200
     if (vida < 1 || vida > 200) {
@@ -79,6 +98,12 @@ app.delete('/herois/:id', async (req, res) => {
 app.put('/herois/:id', async (req, res) => {
     const { id } = req.params;
     const { nome, poder, nivel, vida } = req.body;
+
+    const campoVazio = validarCampos(req.body);
+    if (campoVazio) {
+        return res.status(400).send({ mensagem: `Preencha o campo ${campoVazio}` });
+    }
+
 
     // verificar se a vida está entre 1 e 200
     if (vida < 1 || vida > 200) {
@@ -158,8 +183,8 @@ app.get('/herois/batalha/:id1/:id2', async (req, res) => {
         const heroi1 = result1.rows[0];
         const heroi2 = result2.rows[0];
 
-        const poder1 = heroi1.nivel + heroi1.vida / 2;
-        const poder2 = heroi2.nivel + heroi2.vida / 2;
+        const poder1 = heroi1.nivel + heroi1.vida * heroi1.nome.length;
+        const poder2 = heroi2.nivel + heroi2.vida * heroi2.nome.length;
 
         if (poder1 > poder2) {
             res.send({
@@ -203,27 +228,46 @@ app.get('/herois/batalha/:nome', async (req, res) => {
 
     try {
         const result = await pool.query('SELECT * FROM herois WHERE nome = $1', [nome]);
-
+    
         if (result.rowCount == 0) {
             return res.status(404).send('Herói não encontrado');
         }
-
+    
         const heroi = result.rows[0];
-
-        const resultBatalhas = await pool.query('SELECT * FROM batalhas WHERE id_heroi1 = $1 OR id_heroi2 = $1', [heroi.id]);
+    
+        const batalhas = await pool.query('SELECT batalhas.id as numero_batalha, batalhas.id_heroi1 as heroi1, batalhas.id_heroi2 as heroi2, herois.* FROM batalhas INNER JOIN herois ON batalhas.vencedor = herois.id WHERE batalhas.id_heroi1 = $1 OR batalhas.id_heroi2 = $1', [heroi.id]);
+     
+            
+        const batalhasFormatadas = batalhas.rows.map(batalha => {
+            return {
+                id: batalha.numero_batalha,
+                heroi_1: {
+                    nome: batalha.nome,
+                    nivel: batalha.nivel,
+                    vida: batalha.vida,
+                    poder: batalha.poder
+                },
+                heroi_2: {
+                    nome: batalha.nome,
+                    nivel: batalha.nivel,
+                    vida: batalha.vida,
+                    poder: batalha.poder
+                },
+                vencedor: batalha.nome
+            };
+        });
 
         res.json({
-            total: resultBatalhas.rowCount,
-            batalhas: resultBatalhas.rows,
+            total: batalhas.length,
+            batalhas: batalhasFormatadas,
             vencedor: heroi
         });
     } catch (error) {
         console.error('Erro ao obter batalhas:', error);
         res.status(500).send('Erro ao obter batalhas');
-    }
-});
+    }});
 
-
+   
 // listar todas as batalhas feitas
 app.get('/herois/batalhas', async (req, res) => {
     try {
