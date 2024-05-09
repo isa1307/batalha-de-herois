@@ -1,4 +1,8 @@
 # Gerenciamento de heróis 🦸‍♀️🦸‍♂️
+<div align="center">
+  <img width="600" src="https://github.com/isa1307/batalha-de-herois/assets/125027572/a5055d9b-c223-46c0-abb3-b61720d6b287/">
+</div>
+
 O Projeto de Gerenciamento de Heróis é uma aplicação de backend desenvolvida para oferecer funcionalidades de CRUD (Create, Read, Update, Delete) relacionadas a heróis. Ele permite a criação, atualização, exclusão e recuperação de informações sobre heróis, bem como funcionalidades adicionais, como batalhas entre heróis e registro de histórico de batalhas.
 
 ## Configuração
@@ -7,8 +11,9 @@ O Projeto de Gerenciamento de Heróis é uma aplicação de backend desenvolvida
    Certifique-se de ter o Node.js e o PostgreSQL instalados em sua máquina.
 
 2. **Clonando o Repositório:**
-  
- git clone (https://github.com/isa1307/batalha-de-herois.git)
+  ```
+ git clone https://github.com/isa1307/batalha-de-herois.git
+```
   
 
 4. **Instalando Dependências:**
